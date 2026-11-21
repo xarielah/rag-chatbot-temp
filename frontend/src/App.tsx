@@ -66,23 +66,27 @@ function App() {
     setLoading(false)
   }
 
-  const userMenu = (
-    <div className="absolute top-3 right-4 z-10">
+  const header = (
+    <header className="fixed inset-x-0 top-0 z-10 flex h-14 items-center justify-end bg-transparent px-4 backdrop-blur-md">
       <UserMenu
         user={user}
         checking={checking}
         onLogin={login}
         onLogout={handleLogout}
       />
-    </div>
+    </header>
   )
+
+  const firstName = user?.name.trim().split(/\s+/)[0]
 
   if (messages.length === 0) {
     return (
       <main className="relative flex min-h-svh flex-col items-center justify-center gap-8 px-4">
-        {userMenu}
+        {header}
+
         <h1 className="text-center text-3xl font-semibold tracking-tight">
-          What can I help with?
+          {firstName && <div>Hi {firstName},</div>}
+          What can I help you with?
         </h1>
         <div className="w-full max-w-3xl">
           <ChatInput
@@ -109,9 +113,9 @@ function App() {
 
   return (
     <main className="relative flex h-svh flex-col">
-      {userMenu}
+      {header}
       <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 pt-20 pb-8">
           {messages.map((m) => (
             <MessageBubble key={m.id} message={m} />
           ))}

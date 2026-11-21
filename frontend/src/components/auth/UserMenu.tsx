@@ -35,10 +35,6 @@ export function UserMenu({ user, checking, onLogin, onLogout }: UserMenuProps) {
           {user.name.charAt(0).toUpperCase()}
         </div>
       )}
-      <div className="hidden flex-col leading-tight sm:flex">
-        <span className="text-sm font-medium">{user.name}</span>
-        <span className="text-xs text-muted-foreground">{user.email}</span>
-      </div>
       <Button variant="ghost" size="icon-sm" onClick={onLogout} title="Log out" aria-label="Log out">
         <LogOut />
       </Button>
