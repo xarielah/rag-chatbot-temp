@@ -5,3 +5,10 @@ qdrant-client
 anthropic
 voyageai
 pypdf
+sqlalchemy>=2.0
+psycopg[binary]>=3.2
+alembic
+authlib
+httpx
+itsdangerous
+email-validator

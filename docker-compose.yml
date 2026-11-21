@@ -1,17 +1,37 @@
 services:
   qdrant:
-    image: qdrant/qdrant:latest   # מומלץ לנעול לאותה גרסה של Qdrant Cloud
+    image: qdrant/qdrant:latest
     volumes:
       - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag_dev_password
+      POSTGRES_DB: rag
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d rag"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     restart: unless-stopped
 
   backend:
     build: ./backend
     env_file: .env
     environment:
-      QDRANT_URL: http://qdrant:6333
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
+      # set DATABASE_URL in .env to use a cloud Postgres (add ?sslmode=require if needed)
+      DATABASE_URL: ${DATABASE_URL:-postgresql://rag:rag_dev_password@postgres:5432/rag}
     depends_on:
-      - qdrant
+      qdrant:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   ingest:
@@ -19,7 +39,7 @@ services:
     command: python -m app.ingest
     env_file: .env
     environment:
-      QDRANT_URL: http://qdrant:6333
+      QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
       DOCS_DIR: /data/docs
     volumes:
       - ./docs:/data/docs:ro
@@ -29,3 +49,4 @@ services:
 
 volumes:
   qdrant_data:
+  pg_data:
