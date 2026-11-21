@@ -14,14 +14,6 @@ services:
       - qdrant
     restart: unless-stopped
 
-  frontend:
-    build: ./frontend
-    ports:
-      - "8080:80"
-    depends_on:
-      - backend
-    restart: unless-stopped
-
   ingest:
     build: ./backend
     command: python -m app.ingest
