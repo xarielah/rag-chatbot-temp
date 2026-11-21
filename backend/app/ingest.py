@@ -9,6 +9,7 @@ import sys
 import uuid
 from collections import Counter
 from pathlib import Path
+from typing import cast
 
 import voyageai
 from pypdf import PdfReader
@@ -60,11 +61,11 @@ def make_chunks(path: Path) -> list[dict]:
 
 
 def embed_documents(texts: list[str]) -> list[list[float]]:
-    vo = voyageai.Client(api_key=settings.voyage_api_key)
+    vo = voyageai.Client(api_key=settings.voyage_api_key) # pyright: ignore[reportPrivateImportUsage]
     vectors: list[list[float]] = []
     for i in range(0, len(texts), EMBED_BATCH):
         result = vo.embed(texts[i : i + EMBED_BATCH], model=settings.embed_model, input_type="document")
-        vectors.extend(result.embeddings)
+        vectors.extend(cast(list[list[float]], result.embeddings))
     return vectors
 
 
@@ -90,7 +91,7 @@ def ingest_file(client: QdrantClient, path: Path, docs_dir: Path, embed=embed_do
         existing, _ = client.scroll(
             COLLECTION, scroll_filter=by_source(source), limit=1, with_payload=["file_hash"]
         )
-    if existing and existing[0].payload.get("file_hash") == file_hash:
+    if existing and (existing[0].payload or {}).get("file_hash") == file_hash:
         return "skipped"
 
     chunks = make_chunks(path)
@@ -129,7 +130,11 @@ def prune(client: QdrantClient, keep: set[str]) -> int:
     offset = None
     while True:
         points, offset = client.scroll(COLLECTION, limit=256, offset=offset, with_payload=["source"])
-        stale.update(p.payload["source"] for p in points if p.payload["source"] not in keep)
+        stale.update(
+            p.payload["source"]
+            for p in points
+            if p.payload is not None and p.payload["source"] not in keep
+        )
         if offset is None:
             break
     for source in stale:
