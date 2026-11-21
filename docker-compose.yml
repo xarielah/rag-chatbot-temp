@@ -1,6 +1,6 @@
 services:
   qdrant:
-    image: qdrant/qdrant:latest   # מומלץ לנעול לתגית גרסה ספציפית
+    image: qdrant/qdrant:latest   # מומלץ לנעול לאותה גרסה של Qdrant Cloud
     volumes:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
@@ -21,6 +21,19 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+
+  ingest:
+    build: ./backend
+    command: python -m app.ingest
+    env_file: .env
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      DOCS_DIR: /data/docs
+    volumes:
+      - ./docs:/data/docs:ro
+    depends_on:
+      - qdrant
+    profiles: ["tools"]
 
 volumes:
   qdrant_data:
