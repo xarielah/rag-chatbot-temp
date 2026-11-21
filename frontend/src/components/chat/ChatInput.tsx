@@ -10,6 +10,9 @@ type Props = {
   autoFocus?: boolean
 }
 
+const MAX_LENGTH = 2000
+const COUNTER_THRESHOLD = 1800
+
 export function ChatInput({ onSubmit, disabled, autoFocus }: Props) {
   const [value, setValue] = useState('')
   const canSend = value.trim().length > 0 && !disabled
@@ -28,11 +31,21 @@ export function ChatInput({ onSubmit, disabled, autoFocus }: Props) {
   }
 
   return (
-    <div className="flex items-end gap-2 rounded-3xl border bg-background p-2 pl-5 shadow-sm focus-within:ring-3 focus-within:ring-ring/30">
+    <div className="relative flex items-end gap-2 rounded-3xl border bg-background p-2 pl-5 shadow-sm focus-within:ring-3 focus-within:ring-ring/30">
+      {value.length >= COUNTER_THRESHOLD && (
+        <span
+          className={`absolute -top-6 right-4 text-xs ${
+            value.length >= MAX_LENGTH ? 'text-destructive' : 'text-muted-foreground'
+          }`}
+        >
+          {value.length}/{MAX_LENGTH}
+        </span>
+      )}
       <Textarea
         autoFocus={autoFocus}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        maxLength={MAX_LENGTH}
+        onChange={(e) => setValue(e.target.value.slice(0, MAX_LENGTH))}
         onKeyDown={onKeyDown}
         placeholder="Ask anything"
         rows={1}
