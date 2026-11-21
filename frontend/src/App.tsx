@@ -85,7 +85,23 @@ function App() {
           What can I help with?
         </h1>
         <div className="w-full max-w-3xl">
-          <ChatInput onSubmit={handleSubmit} autoFocus />
+          <ChatInput
+            onSubmit={handleSubmit}
+            disabled={checking || !user}
+            autoFocus
+          />
+          {!checking && !user && (
+            <p className="mt-3 text-center text-sm text-muted-foreground">
+              <button
+                type="button"
+                onClick={login}
+                className="font-medium text-foreground underline underline-offset-4"
+              >
+                Log in
+              </button>{' '}
+              to start chatting.
+            </p>
+          )}
         </div>
       </main>
     )
