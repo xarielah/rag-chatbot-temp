@@ -1,7 +1,13 @@
-// TODO: replace with a call to the backend chat endpoint once it exists
-// (e.g. POST /api/chat). The Vercel/nginx config already proxies /api/*.
+// Goes through the /api/* proxy (Vercel rewrite / nginx), so the backend route is /api/chat.
 export async function sendMessage(text: string): Promise<string> {
-  void text
-  await new Promise((resolve) => setTimeout(resolve, 900))
-  return 'This is a placeholder response. The chat endpoint is not connected yet.'
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: text }),
+  })
+  if (!res.ok) {
+    throw new Error(`Chat request failed (${res.status})`)
+  }
+  const data = await res.json()
+  return data.response ?? data.answer ?? ''
 }
