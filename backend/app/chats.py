@@ -151,4 +151,4 @@ def purge_expired_chats() -> int:
     with SessionLocal() as db:
         res = db.execute(delete(Chat).where(Chat.expires_at <= _now()))
         db.commit()
-        return res.rowcount or 0
+        return int(getattr(res, "rowcount", 0) or 0)

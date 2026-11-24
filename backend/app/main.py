@@ -118,6 +118,7 @@ def chat(
 ):
     user_id = current.user.id
     existing = chats.get_chat(db, user_id, req.chat_id) if req.chat_id else None
+    print(f"User ID: {user_id}, Chat ID: {req.chat_id}, Message: {req.message}, Existing: {existing}")
     chats.check_budget(existing)  # before any Voyage/Anthropic spend
     history = chats.load_history(db, existing) if existing else []
     try:
