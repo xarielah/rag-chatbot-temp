@@ -15,6 +15,23 @@ export class ChatError extends Error {
   }
 }
 
+export type StoredMessage = {
+  id: number
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export async function fetchChatMessages(chatId: string): Promise<StoredMessage[]> {
+  const res = await fetch(`/api/chats/${encodeURIComponent(chatId)}/messages`)
+  if (res.status === 404 || res.status === 422) {
+    throw new ChatError('gone', 'Chat not found')
+  }
+  if (!res.ok) {
+    throw new ChatError('other', `Loading chat failed (${res.status})`)
+  }
+  return res.json()
+}
+
 export async function sendMessage(
   text: string,
   chatId: string | null,
